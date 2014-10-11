@@ -10,6 +10,10 @@ namespace AI_Checkers
 	{
 		static void Main(string[] args)
 		{
+			using (var game = new Game())
+			{
+				game.Start(1200, 675, "AI Checkers");
+			}
 		}
 	}
 }
