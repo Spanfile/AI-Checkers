@@ -12,17 +12,9 @@ namespace AI_Checkers
 	{
 		Vertex[] verts;
 
-		public Tile(Vector2f position, Vector2f size)
+		public Tile(Vector2f position, Vector2f size, Color color)
 		{
 			this.Position = new Vector2f(position.X * size.X, position.Y * size.Y);
-
-			var light = new Color(204, 150, 73);
-			var dark = new Color(148, 93, 16);
-
-			var color = dark;
-
-			if (position.X % 2 == position.Y % 2) // woot woot. makes that chessboard pattern
-				color = light;
 
 			verts = new Vertex[]
 			{
@@ -31,6 +23,11 @@ namespace AI_Checkers
 				new Vertex(new Vector2f(size.X, size.Y), color),
 				new Vertex(new Vector2f(0, size.Y), color)
 			};
+		}
+
+		public Vertex[] GetVerts()
+		{
+			return verts;
 		}
 
 		public void Draw(RenderTarget target, RenderStates states)

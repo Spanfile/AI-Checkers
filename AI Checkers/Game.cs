@@ -32,7 +32,7 @@ namespace AI_Checkers
 		{
 			BackgroundColor = new Color(100, 149, 247);
 
-			var ingame = new Ingame();
+			var ingame = new Ingame(this);
 			SetActiveGameState(ingame);
 		}
 

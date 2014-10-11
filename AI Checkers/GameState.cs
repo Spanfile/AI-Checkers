@@ -20,6 +20,13 @@ namespace AI_Checkers
 
 		public bool Loaded { get; private set; }
 
+		protected Game game;
+
+		public GameState(Game game)
+		{
+			this.game = game;
+		}
+
 		public virtual void Load()
 		{
 			Loaded = true;
