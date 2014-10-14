@@ -24,7 +24,11 @@ namespace AI_Checkers
 		}
 
 		GameState activeGameState;
+
 		RenderTexture stateTexture;
+		Vector2f stateTexPos;
+		Vector2f stateTexOrigin;
+		Vector2f stateTexScale;
 
 		string title;
 
@@ -32,8 +36,8 @@ namespace AI_Checkers
 		{
 			BackgroundColor = new Color(100, 149, 247);
 
-			var ingame = new Ingame(this);
-			SetActiveGameState(ingame);
+			stateTexPos = new Vector2f(0, 0);
+			stateTexScale = new Vector2f(1f, 1f);
 		}
 
 		public void Dispose()
@@ -50,18 +54,50 @@ namespace AI_Checkers
 			stateTexture = new RenderTexture((uint)activeGameState.Bounds.X, (uint)activeGameState.Bounds.Y);
 		}
 
+		public Vector2i GetMousePosition() // TODO: fix scale thing
+		{
+			var mouse = Mouse.GetPosition(Window);
+			var texPos = stateTexPos - stateTexOrigin;
+			var scaled = new Vector2f((stateTexPos.X - texPos.X) * stateTexScale.X, (stateTexPos.Y - texPos.Y) * stateTexScale.Y);
+			var disp = stateTexPos - scaled;
+			//Console.WriteLine(disp);
+			return new Vector2i((int)(mouse.X - disp.X), (int)(mouse.Y - disp.Y));
+		}
+
+		void UpdateStateTexturePos()
+		{
+			var pos = new Vector2f(Window.Size.X / 2f, Window.Size.Y / 2f);
+			var origin = new Vector2f(stateTexture.Size.X / 2f, stateTexture.Size.Y / 2f);
+
+			var topDist = (pos - origin).Y;
+			var leftDist = (pos - origin).X;
+
+			var scale = 1f;
+			if (topDist < leftDist)
+				scale = (topDist * 2f + stateTexture.Size.Y) / stateTexture.Size.Y;
+			else
+				scale = (leftDist * 2f + stateTexture.Size.X) / stateTexture.Size.X;
+
+			stateTexPos = pos;
+			stateTexOrigin = origin;
+			stateTexScale = new Vector2f(scale, scale);
+		}
+
 		public void Start(uint width, uint height, string title)
 		{
 			var mode = new VideoMode(width, height);
 			this.title = title;
 
-			Window = new RenderWindow(mode, title, Styles.Default);
+			Window = new RenderWindow(mode, title, Styles.Close);
 			RStates = new RenderStates(RenderStates.Default);
 
 			Window.Closed += Window_Closed;
 			Window.Resized += Window_Resized;
 
 			Window.SetVerticalSyncEnabled(true);
+
+			var ingame = new Ingame(this);
+			SetActiveGameState(ingame);
 
 			var frametimer = new Stopwatch();
 			while (Window.IsOpen())
@@ -71,6 +107,7 @@ namespace AI_Checkers
 				Window.DispatchEvents();
 
 				activeGameState.Update(Frametime);
+				UpdateStateTexturePos();
 
 				Window.Clear(Color.Black);
 				stateTexture.Clear(BackgroundColor);
@@ -79,24 +116,9 @@ namespace AI_Checkers
 
 				stateTexture.Display();
 				var sprite = new Sprite(stateTexture.Texture);
-				var pos = new Vector2f(Window.Size.X / 2, Window.Size.Y / 2);
-				var origin = new Vector2f(stateTexture.Size.X / 2, stateTexture.Size.Y / 2);
-
-				sprite.Position = pos;
-				sprite.Origin = origin;
-
-				var topDist = (pos - origin).Y;
-				var leftDist = (pos - origin).X;
-				var dist = Math.Min(topDist, leftDist);
-
-				var scale = 1f;
-				if (topDist < leftDist)
-					scale = (topDist * 2f + stateTexture.Size.Y) / stateTexture.Size.Y;
-				else
-					scale = (leftDist * 2f + stateTexture.Size.X) / stateTexture.Size.X;
-
-				var scaleVec = new Vector2f(scale, scale);
-				sprite.Scale = scaleVec;
+				sprite.Position = stateTexPos;
+				sprite.Origin = stateTexOrigin;
+				sprite.Scale = stateTexScale;
 
 				sprite.Draw(Window, RStates);
 
