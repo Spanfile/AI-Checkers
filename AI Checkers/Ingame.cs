@@ -45,19 +45,129 @@ namespace AI_Checkers
 		{
 			var mouse = game.GetMousePosition();
 
-			var selected = (from t
-						    in tiles
-							where t.ContainsPoint(new Vector2f(mouse.X, mouse.Y), boardTransform)
-							select t).ToList();
-			if (!selected.Any())
-				return;
-
-			var tile = selected.First();
-
-			Console.WriteLine("Tile: {0}", tile.boardPos);
-
-			if (pickedIndex == -1)
+			if (e.Button == Mouse.Button.Left)
 			{
+				#region Piece moving
+				var selected = (from t
+								in tiles
+								where t.ContainsPoint(new Vector2f(mouse.X, mouse.Y), boardTransform)
+								select t).ToList();
+				if (!selected.Any())
+					return;
+
+				var tile = selected.First();
+
+				Console.WriteLine("Tile: {0}", tile.boardPos);
+
+				if (pickedIndex == -1)
+				{
+					var pieces = this.pieces.Where(
+						p => p.boardPos.X == tile.boardPos.X &&
+						p.boardPos.Y == tile.boardPos.Y &&
+						!p.eaten).ToList();
+
+					if (!pieces.Any())
+						return;
+
+					var piece = pieces.First();
+
+					if (piece.type != turn)
+						return;
+
+					piece.picked = true;
+					pickedIndex = this.pieces.IndexOf(piece);
+
+					Console.WriteLine("{0} piece picked up", piece.type.ToString());
+				}
+				else
+				{
+					var allowed = GetPossibleMoveIndices(pickedIndex);
+
+					if (!allowed.Contains(tiles.IndexOf(tile)))
+						return;
+
+					var moved = !pieces[pickedIndex].boardPos.Equals(tile.boardPos);
+					var previous = pieces[pickedIndex].boardPos;
+
+					if (!moved)
+						Console.WriteLine("Piece position not changed");
+
+					pieces[pickedIndex].SetBoardPos(tile.boardPos);
+					pieces[pickedIndex].picked = false;
+
+					Console.WriteLine("{0} piece dropped at {1}", pieces[pickedIndex].type.ToString(), tile.boardPos);
+
+					if (pieces[pickedIndex].type == PieceType.Red)
+					{
+						if (tile.boardPos.Y == 7)
+						{
+							pieces[pickedIndex].super = true;
+							Console.WriteLine("Holy shit the piece has become a super piece");
+						}
+					}
+					else
+					{
+						if (tile.boardPos.Y == 0)
+						{
+							pieces[pickedIndex].super = true;
+							Console.WriteLine("Holy shit the piece has become a super piece");
+						}
+					}
+
+					var pieceEaten = false;
+					// check if a piece was eaten
+					if (moved)
+					{
+						// okay so we moved, how much?
+						var change = tile.boardPos - previous;
+						//Console.WriteLine("Piece position changed by {0}", change);
+						if (Math.Abs(change.X) > 1 && Math.Abs(change.Y) > 1)
+						{
+							// we may have jumped over a piece
+
+							var gcd = (float)Math.Abs(GreatestCommonDivisor(change.X, change.Y));
+							var direction = new Vector2f(change.X / gcd, change.Y / gcd);
+							//Console.WriteLine("Change: {0}, GCD: {1}, dir: {2}", change, gcd, direction);
+
+							var inverse = pieces[pickedIndex].type == PieceType.Red ? PieceType.Black : PieceType.Red;
+
+							// traverse backwards, eating any pieces that we find
+							var point = tile.boardPos - direction;
+							while (true)
+							{
+								if (IsPieceAt(point, inverse))
+								{
+									Console.WriteLine("{0} piece eaten at {1}", pieces[GetIndexOfPiece(point)].type, point);
+									pieces[GetIndexOfPiece(point)].eaten = true;
+									pieceEaten = true;
+								}
+
+								point -= direction;
+								if (point.Equals(previous))
+									break;
+							}
+						}
+					}
+
+					HandleTurn(moved, pieceEaten);
+
+					pickedIndex = -1;
+				}
+				#endregion
+			}
+			else if (e.Button == Mouse.Button.Right)
+			{
+				var selected = (from t
+								in tiles
+								where t.ContainsPoint(new Vector2f(mouse.X, mouse.Y), boardTransform)
+								select t).ToList();
+				if (!selected.Any())
+					return;
+
+				var tile = selected.First();
+
+				Console.WriteLine("Tile: {0}", tile.boardPos);
+
 				var pieces = this.pieces.Where(
 					p => p.boardPos.X == tile.boardPos.X &&
 					p.boardPos.Y == tile.boardPos.Y &&
@@ -68,69 +178,7 @@ namespace AI_Checkers
 
 				var piece = pieces.First();
 
-				if (piece.type != turn)
-					return;
-
-				piece.picked = true;
-				pickedIndex = this.pieces.IndexOf(piece);
-
-				Console.WriteLine("{0} piece picked up", piece.type.ToString());
-			}
-			else
-			{
-				var allowed = GetPossibleMoveIndices(pickedIndex);
-
-				if (!allowed.Contains(tiles.IndexOf(tile)))
-					return;
-
-				var moved = !pieces[pickedIndex].boardPos.Equals(tile.boardPos);
-				var previous = pieces[pickedIndex].boardPos;
-
-				if (!moved)
-					Console.WriteLine("Piece position not changed");
-
-				pieces[pickedIndex].SetBoardPos(tile.boardPos);
-				pieces[pickedIndex].picked = false;
-
-				Console.WriteLine("{0} piece dropped at {1}", pieces[pickedIndex].type.ToString(), tile.boardPos);
-
-				if (pieces[pickedIndex].type == PieceType.Red)
-				{
-					if (tile.boardPos.Y == 7)
-					{
-						pieces[pickedIndex].super = true;
-						Console.WriteLine("Holy shit the piece has become a super piece");
-					}
-				}
-				else
-				{
-					if (tile.boardPos.Y == 0)
-					{
-						pieces[pickedIndex].super = true;
-						Console.WriteLine("Holy shit the piece has become a super piece");
-					}
-				}
-
-				var pieceEaten = false;
-				// check if a piece was eaten
-				if (moved)
-				{
-					// okay so we moved, how much?
-					var change = previous - tile.boardPos;
-					//Console.WriteLine("Piece position changed by {0}", change);
-					if (Math.Abs(change.X) > 1 && Math.Abs(change.Y) > 1)
-					{
-						// yup, we ate a piece
-						var eat = tile.boardPos + (change / 2f);
-						Console.WriteLine("Piece jumped over a piece at {0}", eat);
-						pieces[GetIndexOfPiece(eat)].eaten = true;
-						pieceEaten = true;
-					}
-				}
-
-				HandleTurn(moved, pieceEaten);
-
-				pickedIndex = -1;
+				piece.super = !piece.super;
 			}
 		}
 
@@ -154,46 +202,65 @@ namespace AI_Checkers
 		{
 			var piece = pieces[pieceIndex];
 			var y = piece.type == PieceType.Red ? -1 : 1; // red = -1, black = 1
-
-			var check1 = piece.boardPos - new Vector2f(1, y);
-			var check2 = piece.boardPos - new Vector2f(-1, y);
+			var inverse = piece.type == PieceType.Red ? PieceType.Black : PieceType.Red;
 
 			List<int> indices = new List<int>();
-			foreach (var tile in tiles)
+
+			indices.Add(GetIndexOfTile(piece.boardPos));
+
+			if (!piece.super)
 			{
-				var index = tiles.IndexOf(tile);
-
-				if (tile.boardPos.Equals(piece.boardPos))
-					indices.Add(index);
-
-				if (tile.boardPos.Equals(check1) && !IsPieceAt(check1))
-					indices.Add(index);
-
-				if (tile.boardPos.Equals(check2) && !IsPieceAt(check2))
-					indices.Add(index);
-
-				// help i made a bad code
-				// TODO: make good
-				if (IsPieceAt(check1, piece.type == PieceType.Red ? PieceType.Black : PieceType.Red))
-				{
-					if (!IsPieceAt(check1 - new Vector2f(1, y)))
-					{
-						if (tile.boardPos.Equals(check1 - new Vector2f(1, y)))
-							indices.Add(index);
-					}
-				}
-
-				if (IsPieceAt(check2, piece.type == PieceType.Red ? PieceType.Black : PieceType.Red))
-				{
-					if (!IsPieceAt(check2 - new Vector2f(-1, y)))
-					{
-						if (tile.boardPos.Equals(check2 - new Vector2f(-1, y)))
-							indices.Add(index);
-					}
-				}
+				CheckPointRecursion(piece.boardPos, new Vector2f(-1, -y), piece.type, piece.super, ref indices);
+				CheckPointRecursion(piece.boardPos, new Vector2f(1, -y), piece.type, piece.super, ref indices);
+			}
+			else
+			{
+				CheckPointRecursion(piece.boardPos, new Vector2f(-1, y), piece.type, piece.super, ref indices);
+				CheckPointRecursion(piece.boardPos, new Vector2f(1, y), piece.type, piece.super, ref indices);
+				CheckPointRecursion(piece.boardPos, new Vector2f(-1, -y), piece.type, piece.super, ref indices);
+				CheckPointRecursion(piece.boardPos, new Vector2f(1, -y), piece.type, piece.super, ref indices);
 			}
 
 			return indices.ToArray();
+		}
+
+		void CheckPointRecursion(Vector2f point, Vector2f direction, PieceType type, bool isSuper, ref List<int> indices)
+		{
+			var check = point + direction;
+			var inverse = type == PieceType.Red ? PieceType.Black : PieceType.Red;
+
+			if (check.X < 0 || check.X > 7 || check.Y < 0 || check.Y > 7)
+				return;
+
+			if (!IsPieceAt(check))
+			{
+				indices.Add(GetIndexOfTile(check));
+				if (isSuper)
+					CheckPointRecursion(check, direction, type, isSuper, ref indices);
+			}
+			else if (IsPieceAt(check, inverse))
+			{
+				if (!isSuper)
+				{
+					if (!IsPieceAt(check + direction))
+						indices.Add(GetIndexOfTile(check + direction));
+				}
+				else
+				{
+					while (true)
+					{
+						if (!IsPieceAt(check + direction, inverse))
+						{
+							indices.Add(GetIndexOfTile(check + direction));
+							break;
+						}
+
+						check += direction;
+						if (check.X < 0 || check.X > 7 || check.Y < 0 || check.Y > 7)
+							break;
+					}
+				}
+			}
 		}
 
 		bool IsPieceAt(Vector2f point)
@@ -216,8 +283,33 @@ namespace AI_Checkers
 				return -1;
 
 			return pieces.IndexOf((from piece in pieces
-								   where piece.boardPos.Equals(point)
+								   where piece.boardPos.Equals(point) && !piece.eaten
 								   select piece).First());
+		}
+
+		int GetIndexOfTile(Vector2f point)
+		{
+			if (point.X < 0 || point.X > 7 || point.Y < 0 || point.Y > 7)
+				return -1;
+
+			return tiles.IndexOf((from tile in tiles
+								  where tile.boardPos.Equals(point)
+								  select tile).First());
+		}
+
+		int GetPieceCount(PieceType type)
+		{
+			return (from piece in pieces
+					where piece.type == type
+					select piece).Count();
+		}
+
+		double GreatestCommonDivisor(double a, double b)
+		{
+			if (b == 0)
+				return a;
+
+			return GreatestCommonDivisor(b, a % b);
 		}
 
 		public override void Load()
