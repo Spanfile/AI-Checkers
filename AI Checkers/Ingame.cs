@@ -30,12 +30,8 @@ namespace AI_Checkers
 		int pickedIndex;
 		PieceType turn;
 
-		public Ingame(Game game)
-			: base(game)
+		public Ingame()
 		{
-			game.Window.MouseButtonPressed += Window_MouseButtonPressed;
-			game.Window.MouseButtonReleased += Window_MouseButtonReleased;
-
 			pickedIndex = -1;
 
 			turn = PieceType.Red;
@@ -43,6 +39,9 @@ namespace AI_Checkers
 
 		void Window_MouseButtonPressed(object sender, MouseButtonEventArgs e)
 		{
+			if (!Active)
+				return;
+
 			var mouse = game.GetMousePosition();
 
 			if (e.Button == Mouse.Button.Left)
@@ -184,7 +183,8 @@ namespace AI_Checkers
 
 		void Window_MouseButtonReleased(object sender, MouseButtonEventArgs e)
 		{
-			
+			if (!Active)
+				return;
 		}
 
 		void HandleTurn(bool moved, bool pieceEaten)
@@ -249,7 +249,7 @@ namespace AI_Checkers
 				{
 					while (true)
 					{
-						if (!IsPieceAt(check + direction, inverse))
+						if (!IsPieceAt(check + direction))
 						{
 							indices.Add(GetIndexOfTile(check + direction));
 							break;
@@ -312,8 +312,11 @@ namespace AI_Checkers
 			return GreatestCommonDivisor(b, a % b);
 		}
 
-		public override void Load()
+		public override void Load(Game game)
 		{
+			game.Window.MouseButtonPressed += Window_MouseButtonPressed;
+			game.Window.MouseButtonReleased += Window_MouseButtonReleased;
+
 			tiles = new List<Tile>();
 			pieces = new List<Piece>();
 
@@ -347,7 +350,7 @@ namespace AI_Checkers
 
 			boardTransform.Rotate(45f, new Vector2f(boardSize.X / 2f, boardSize.Y / 2f));
 
-			base.Load();
+			base.Load(game);
 		}
 
 		public override void Update(float frametime)
@@ -393,8 +396,27 @@ namespace AI_Checkers
 
 			if (pickedIndex != -1)
 			{
-				pieces[pickedIndex].SetPosition(new Vector2f(mouse.X, mouse.Y));
+				pieces[pickedIndex].SetPosition(new Vector2f(mouse.X + 8f, mouse.Y + 15f));
 				target.Draw(pieces[pickedIndex]);
+			}
+		}
+
+		/// <summary>
+		/// Used to draw the board only as a decoration
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="states"></param>
+		public void DrawBoard(RenderTarget target, RenderStates states)
+		{
+			states.Transform *= boardTransform;
+
+			foreach (var tile in tiles)
+				tile.Draw(target, states);
+
+			foreach (var piece in pieces)
+			{
+				piece.ApplyTransform(boardTransform);
+				target.Draw(piece);
 			}
 		}
 	}

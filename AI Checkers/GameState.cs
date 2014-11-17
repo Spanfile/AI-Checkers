@@ -10,6 +10,10 @@ namespace AI_Checkers
 {
 	public abstract class GameState
 	{
+		public static MainMenu MainMenu;
+		public static Ingame Ingame;
+		public bool Active { get; set; }
+
 		public virtual Vector2f Bounds
 		{
 			get
@@ -22,13 +26,18 @@ namespace AI_Checkers
 
 		protected Game game;
 
-		public GameState(Game game)
+		public GameState()
 		{
-			this.game = game;
+		}
+		static GameState()
+		{
+			MainMenu = new MainMenu();
+			Ingame = new Ingame();
 		}
 
-		public virtual void Load()
+		public virtual void Load(Game game)
 		{
+			this.game = game;
 			Loaded = true;
 		}
 

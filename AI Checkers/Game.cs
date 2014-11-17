@@ -47,10 +47,14 @@ namespace AI_Checkers
 
 		public void SetActiveGameState(GameState state)
 		{
+			if (activeGameState != null)
+				activeGameState.Active = false;
+
 			if (!state.Loaded)
-				state.Load();
+				state.Load(this);
 
 			activeGameState = state;
+			state.Active = true;
 			stateTexture = new RenderTexture((uint)activeGameState.Bounds.X, (uint)activeGameState.Bounds.Y);
 		}
 
@@ -96,8 +100,7 @@ namespace AI_Checkers
 
 			Window.SetVerticalSyncEnabled(true);
 
-			var ingame = new Ingame(this);
-			SetActiveGameState(ingame);
+			SetActiveGameState(GameState.MainMenu);
 
 			var frametimer = new Stopwatch();
 			while (Window.IsOpen())
