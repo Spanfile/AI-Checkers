@@ -12,8 +12,8 @@ namespace AI_Checkers.UI
 	{
 		Sprite sprite;
 
-		public Frame(Vector2f position, Vector2f size, Color color)
-			: base(position)
+		public Frame(Game game, Vector2f position, Vector2f size, Color color)
+			: base(game, position, size)
 		{
 			sprite = new Sprite(new Texture(new Image((uint)size.X, (uint)size.Y, color)));
 		}

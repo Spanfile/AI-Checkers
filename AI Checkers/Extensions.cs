@@ -30,5 +30,10 @@ namespace AI_Checkers
 		{
 			return from.X * to.X + from.Y * to.Y;
 		}
+
+		public static Vector2f Lerp(this Vector2f from, Vector2f to, float fraction)
+		{
+			return new Vector2f(from.X + (to.X - from.X) * fraction, from.Y + (to.Y - from.Y) * fraction);
+		}
 	}
 }

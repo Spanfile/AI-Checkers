@@ -25,19 +25,42 @@ namespace AI_Checkers
 
 		public MainMenu()
 		{
-			uiBase = new Frame(new Vector2f(Bounds.X / 2 - 250, -400), new Vector2f(500, 300), new Color(177, 219, 222, 200));
 
-			var font = new Font("ARIAL.TTF");
-			uiBase.AddChild(new Label(new Vector2f(250, 10), "AI Checkers", font, Color.Black, 32));
-			uiBase.AddChild(new Button(new Vector2f(190, 250), new Vector2f(120, 40), new Color(121, 219, 147), "Start!", font, Color.Black, 24));
-
-			uiBaseShow = new MarqueeAnim();
-			uiBaseHide = new MarqueeAnim();
 		}
 
 		public override void Load(Game game)
 		{
-			uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150));
+			var font = new Font("ARIAL.TTF");
+
+			uiBaseShow = new MarqueeAnim();
+			uiBaseHide = new MarqueeAnim();
+
+			uiBase = new Frame(game, new Vector2f(Bounds.X / 2 - 250, -400), new Vector2f(500, 300), new Color(177, 219, 222, 200));
+
+			var startButton = new Button(game, new Vector2f(190, 250), new Vector2f(120, 40), new Color(121, 219, 147), "Start!", font, Color.Black, 24);
+			startButton.Clicked += (s, e) => uiBaseHide.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y + 100), 0.05f);
+
+			var ply1Check = new Checkbox(game, new Vector2f(10, 80), "Player 1 AI", Color.Black, font);
+			var ply2Check = new Checkbox(game, new Vector2f(10, 130), "Player 2 AI", Color.Black, font);
+
+			var ply1ai = false;
+			var ply2ai = false;
+
+			ply1Check.CheckChanged += (s, e) => ply1ai = e.Checked;
+			ply2Check.CheckChanged += (s, e) => ply2ai = e.Checked;
+
+			uiBase.AddChild(new Label(game, new Vector2f(250, 20), "AI Checkers", font, Color.Black, 32));
+			uiBase.AddChild(startButton);
+			uiBase.AddChild(ply1Check);
+			uiBase.AddChild(ply2Check);
+
+			uiBaseHide.Stopped += (s, e) =>
+			{
+				GameState.Ingame.SetPlayerAI(ply1ai, ply2ai);
+				game.SetActiveGameState(GameState.Ingame);
+			};
+
+			uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.05f);
 
 			GameState.Ingame.Load(game);
 

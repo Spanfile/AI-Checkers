@@ -11,31 +11,41 @@ namespace AI_Checkers
 	public class MarqueeAnim : Animation
 	{
 		Vector2f to;
+		float initialDist;
+		float time;
+		float speed;
 
 		public MarqueeAnim()
 		{
 
 		}
 
-		public void Start(Transformable target, Vector2f to)
+		public void Start(Transformable target, Vector2f to, float speed)
 		{
 			this.to = to;
+			this.speed = speed;
+
+			initialDist = target.Position.Distance(to);
+			time = 0;
+
 			base.Start(target);
 		}
 
 		protected override void InternalUpdate(float frametime, Transformable target)
 		{
-			var dist = target.Position.Distance(to);
+			time += frametime;
 
+			var dist = target.Position.Distance(to);
+			var travelled = time * speed;
+
+			target.Position = target.Position.Lerp(to, travelled / initialDist);
+			Console.WriteLine(dist);
 			if (dist < 1)
 			{
+				target.Position = new Vector2f((int)to.X, (int)to.Y);
+				Console.WriteLine("Stopped");
 				Stop();
 			}
-
-			var dir = (to - target.Position).Normalize();
-
-			var pos = dir * dist / 10;
-			target.Position += new Vector2f((int)pos.X, (int)pos.Y);
 		}
 	}
 }

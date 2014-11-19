@@ -13,11 +13,32 @@ namespace AI_Checkers.UI
 		public UIObject parent;
 		public List<UIObject> children;
 
-		public UIObject(Vector2f position)
+		public Vector2f size;
+		public FloatRect Bounds
+		{
+			get
+			{
+				if (parent == null)
+					return new FloatRect(Position.X, Position.Y, size.X, size.Y);
+
+				return new FloatRect(parent.Bounds.Left + Position.X, parent.Bounds.Top + Position.Y, size.X, size.Y);
+			}
+		}
+
+		protected Game game;
+
+		public UIObject(Game game, Vector2f position, Vector2f size)
 		{
 			Position = position;
+			this.size = size;
+			this.game = game;
 
 			children = new List<UIObject>();
+		}
+		public UIObject(Game game, Vector2f position)
+			: this(game, position, new Vector2f(0, 0))
+		{
+
 		}
 
 		public void AddChild(UIObject child)

@@ -30,11 +30,20 @@ namespace AI_Checkers
 		int pickedIndex;
 		PieceType turn;
 
+		bool ply1ai;
+		bool ply2ai;
+
 		public Ingame()
 		{
 			pickedIndex = -1;
 
 			turn = PieceType.Red;
+		}
+
+		public void SetPlayerAI(bool ply1, bool ply2)
+		{
+			ply1ai = ply1;
+			ply2ai = ply2;
 		}
 
 		void Window_MouseButtonPressed(object sender, MouseButtonEventArgs e)
