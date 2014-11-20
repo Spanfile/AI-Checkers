@@ -17,7 +17,7 @@ namespace AI_Checkers
 	public class Piece : Transformable, Drawable
 	{
 		public Vector2f boardPos;
-		public PieceType type;
+		public PieceType color;
 		public bool picked;
 		public bool eaten;
 		public bool super;
@@ -33,7 +33,7 @@ namespace AI_Checkers
 			this.boardPos = position;
 			SetBoardPos(position);
 
-			this.type = type;
+			this.color = type;
 			picked = false;
 
 			normalSprite = new Sprite(new Texture("checkerspiece.png"));

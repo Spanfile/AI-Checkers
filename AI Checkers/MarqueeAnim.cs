@@ -39,11 +39,11 @@ namespace AI_Checkers
 			var travelled = time * speed;
 
 			target.Position = target.Position.Lerp(to, travelled / initialDist);
-			Console.WriteLine(dist);
+			//Console.WriteLine(dist);
 			if (dist < 1)
 			{
 				target.Position = new Vector2f((int)to.X, (int)to.Y);
-				Console.WriteLine("Stopped");
+				//Console.WriteLine("Stopped");
 				Stop();
 			}
 		}

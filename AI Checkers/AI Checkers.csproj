@@ -54,7 +54,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="HumanPlayer.cs" />
     <Compile Include="Ingame.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="MarqueeAnim.cs" />
     <Compile Include="Piece.cs" />
