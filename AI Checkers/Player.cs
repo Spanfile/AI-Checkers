@@ -10,11 +10,11 @@ namespace AI_Checkers
 {
     public abstract class Player
     {
-        public PieceType PlayerColor { get; private set; }
+        public PieceColor PlayerColor { get; private set; }
 
         protected Game game;
 
-        public Player(Game game, PieceType color)
+        public Player(Game game, PieceColor color)
         {
             this.game = game;
             PlayerColor = color;

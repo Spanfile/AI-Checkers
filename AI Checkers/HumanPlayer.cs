@@ -16,18 +16,17 @@ namespace AI_Checkers
         
         int picked = -1;
         int to = -1;
-        Tuple<int, int> result;
 
-        AutoResetEvent doneEvent;
+        ManualResetEvent doneEvent;
 
         Ingame ingame;
 
-        public HumanPlayer(Game game, PieceType color)
+        public HumanPlayer(Game game, PieceColor color)
             : base(game, color)
         {
             ingame = GameState.Ingame;
 
-            doneEvent = new AutoResetEvent(false);
+            doneEvent = new ManualResetEvent(false);
         }
 
         void Clicked(Tile clicked)
@@ -47,7 +46,7 @@ namespace AI_Checkers
                     picked = ingame.pieces.IndexOf(piece);
                     ingame.pickedIndex = picked;
 
-                    Console.WriteLine("Piece picked up: {0}", picked);
+                    Console.WriteLine("{0}: Piece picked up: {1}", PlayerColor, picked);
                 }
             }
             else
@@ -57,17 +56,13 @@ namespace AI_Checkers
                 if (!allowed.Contains(ingame.tiles.IndexOf(clicked)))
                     return;
 
-                piece = ingame.pieces[picked];
-
-                piece.picked = false;
-                picked = -1;
-                ingame.pickedIndex = -1;
+                ingame.pieces[picked].picked = false;
 
                 to = ingame.tiles.IndexOf(clicked);
 
                 doneEvent.Set();
 
-                Console.WriteLine("Piece dropped");
+                Console.WriteLine("{0}: Piece dropped", PlayerColor);
             }
         }
 
@@ -75,19 +70,25 @@ namespace AI_Checkers
         {
             active = true;
 
-            await HandleMove();
-
-            return result;
+            return await HandleMove();
         }
 
-        Task HandleMove()
+        Task<Tuple<int, int>> HandleMove()
         {
-            return new Task(() =>
+            return Task.Run<Tuple<int, int>>(() =>
             {
                 doneEvent.WaitOne();
+                doneEvent.Reset();
 
-                result = new Tuple<int, int>(picked, to);
                 active = false;
+
+                var result = new Tuple<int, int>(picked, to);
+
+                picked = -1;
+                ingame.pickedIndex = -1;
+                to = -1;
+
+                return result;
             });
         }
 
@@ -104,7 +105,7 @@ namespace AI_Checkers
             {
                 if (msDown == true)
                 {
-                    Console.WriteLine("Click!");
+                    Console.WriteLine("{0}: Click!", PlayerColor);
 
                     msDown = false;
 

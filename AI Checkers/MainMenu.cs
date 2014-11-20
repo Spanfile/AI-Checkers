@@ -38,7 +38,7 @@ namespace AI_Checkers
             uiBase = new Frame(game, new Vector2f(Bounds.X / 2 - 250, -400), new Vector2f(500, 300), new Color(177, 219, 222, 200));
 
             var startButton = new Button(game, new Vector2f(190, 250), new Vector2f(120, 40), new Color(121, 219, 147), "Start!", font, Color.Black, 24);
-            startButton.Clicked += (s, e) => uiBaseHide.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y + 100), 0.05f);
+            startButton.Clicked += (s, e) => uiBaseHide.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y + 100), 0.2f);
 
             var ply1Check = new Checkbox(game, new Vector2f(10, 80), "Player 1 AI", Color.Black, font);
             var ply2Check = new Checkbox(game, new Vector2f(10, 130), "Player 2 AI", Color.Black, font);
@@ -61,7 +61,7 @@ namespace AI_Checkers
                 game.SetActiveGameState(GameState.Ingame);
             };
 
-            uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.05f);
+            uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.2f);
 
             GameState.Ingame.Load(game);
 

@@ -8,7 +8,7 @@ using SFML.Window;
 
 namespace AI_Checkers
 {
-	public enum PieceType
+	public enum PieceColor
 	{
 		Red,
 		Black
@@ -17,7 +17,7 @@ namespace AI_Checkers
 	public class Piece : Transformable, Drawable
 	{
 		public Vector2f boardPos;
-		public PieceType color;
+		public PieceColor color;
 		public bool picked;
 		public bool eaten;
 		public bool super;
@@ -27,7 +27,7 @@ namespace AI_Checkers
 		Sprite superSprite;
 		Vector2f displayPos;
 
-		public Piece(Vector2f position, Vector2f size, Color color, PieceType type)
+		public Piece(Vector2f position, Vector2f size, Color color, PieceColor type)
 		{
 			this.size = size;
 			this.boardPos = position;

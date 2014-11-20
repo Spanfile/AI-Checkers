@@ -28,7 +28,7 @@ namespace AI_Checkers
         Color dark = new Color(148, 93, 16);
 
         public int pickedIndex;
-        PieceType turn;
+        PieceColor turn;
 
         bool redAI;
         bool blackAI;
@@ -40,18 +40,18 @@ namespace AI_Checkers
         {
             pickedIndex = -1;
 
-            turn = PieceType.Red;
+            turn = PieceColor.Red;
         }
 
         public void Start()
         {
             if (!redAI)
-                redPlayer = new HumanPlayer(game, PieceType.Red);
+                redPlayer = new HumanPlayer(game, PieceColor.Red);
             else
                 throw new NotImplementedException();
 
             if (!blackAI)
-                blackPlayer = new HumanPlayer(game, PieceType.Black);
+                blackPlayer = new HumanPlayer(game, PieceColor.Black);
             else
                 throw new NotImplementedException();
         }
@@ -218,7 +218,7 @@ namespace AI_Checkers
                 return;
 
             if (!pieceEaten)
-                turn = turn == PieceType.Red ? PieceType.Black : PieceType.Red;
+                turn = turn == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
             Console.WriteLine("It is now {0}'s turn", turn.ToString());
         }
@@ -226,8 +226,8 @@ namespace AI_Checkers
         public int[] GetPossibleMoveIndices(int pieceIndex)
         {
             var piece = pieces[pieceIndex];
-            var y = piece.color == PieceType.Red ? -1 : 1; // red = -1, black = 1
-            var inverse = piece.color == PieceType.Red ? PieceType.Black : PieceType.Red;
+            var y = piece.color == PieceColor.Red ? -1 : 1; // red = -1, black = 1
+            var inverse = piece.color == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
             List<int> indices = new List<int>();
 
@@ -249,10 +249,10 @@ namespace AI_Checkers
             return indices.ToArray();
         }
 
-        void CheckPointRecursion(Vector2f point, Vector2f direction, PieceType type, bool isSuper, ref List<int> indices)
+        void CheckPointRecursion(Vector2f point, Vector2f direction, PieceColor type, bool isSuper, ref List<int> indices)
         {
             var check = point + direction;
-            var inverse = type == PieceType.Red ? PieceType.Black : PieceType.Red;
+            var inverse = type == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
             if (check.X < 0 || check.X > 7 || check.Y < 0 || check.Y > 7)
                 return;
@@ -295,7 +295,7 @@ namespace AI_Checkers
                     select piece).Any();
         }
 
-        bool IsPieceAt(Vector2f point, PieceType type)
+        bool IsPieceAt(Vector2f point, PieceColor type)
         {
             return (from piece in pieces
                     where piece.boardPos.Equals(point) && piece.color == type && !piece.eaten
@@ -322,7 +322,7 @@ namespace AI_Checkers
                                   select tile).First());
         }
 
-        int GetPieceCount(PieceType type)
+        int GetPieceCount(PieceColor type)
         {
             return (from piece in pieces
                     where piece.color == type
@@ -348,9 +348,9 @@ namespace AI_Checkers
                         tiles.Add(new Tile(new Vector2f(x, y), tileSize, dark));
 
                         if (y < 3)
-                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(247, 39, 39), PieceType.Red));
+                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(247, 39, 39), PieceColor.Red));
                         else if (y > 4)
-                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(66, 66, 66), PieceType.Black));
+                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(66, 66, 66), PieceColor.Black));
                     }
                     else
                         tiles.Add(new Tile(new Vector2f(x, y), tileSize, light));
@@ -372,7 +372,7 @@ namespace AI_Checkers
 
         public async override void Update(float frametime)
         {
-            var player = turn == PieceType.Red ? redPlayer : blackPlayer;
+            var player = turn == PieceColor.Red ? redPlayer : blackPlayer;
 
             player.Update(frametime);
 
