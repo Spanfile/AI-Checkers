@@ -152,7 +152,7 @@ namespace AI_Checkers
         //                    var gcd = (float)Math.Abs(Extensions.GreatestCommonDivisor(change.X, change.Y));
         //                    var direction = new Vector2f(change.X / gcd, change.Y / gcd);
         //                    //Console.WriteLine("Change: {0}, GCD: {1}, dir: {2}", change, gcd, direction);
-
+        
         //                    var inverse = pieces[pickedIndex].type == PieceType.Red ? PieceType.Black : PieceType.Red;
 
         //                    // traverse backwards, eating any pieces that we find
@@ -409,9 +409,31 @@ namespace AI_Checkers
                     // TODO: the player tried to move an eaten piece
                 }
 
+                var pieceEaten = false;
+                var change = to.boardPos - piece.boardPos;
+                if (Math.Abs(change.X) > 1 && Math.Abs(change.Y) > 1)
+                {
+                    var gcd = (float)Math.Abs(Extensions.GreatestCommonDivisor(change.X, change.Y));
+                    var dir = new Vector2f(change.X / gcd, change.Y / gcd);
+                    var inverse = piece.color == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
+
+                    var point = to.boardPos - dir;
+                    while (!point.Equals(piece.boardPos))
+                    {
+                        if (IsPieceAt(point, inverse))
+                        {
+                            pieces[GetIndexOfPiece(point)].eaten = true;
+                            pieceEaten = true;
+                        }
+
+                        point -= dir;
+                    }
+                }
+
                 piece.SetBoardPos(to.boardPos);
 
-                turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
+                if (!pieceEaten)
+                    turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
                 Console.WriteLine("It is now {0}'s turn", turn);
             }
