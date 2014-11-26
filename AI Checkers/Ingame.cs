@@ -370,41 +370,51 @@ namespace AI_Checkers
             base.Load(game);
         }
 
-        public async override void Update(float frametime)
+        public override void Update(float frametime)
         {
             var player = turn == PieceColor.Red ? redPlayer : blackPlayer;
 
-            player.Update(frametime);
+            if (player.GetState() != PlayerState.Running)
+                player.StartMove();
 
-            var move = await player.GetMove();
-            Console.WriteLine("Red's move: {0} to {1}", move.Item1, move.Item2);
+            if (player.GetState() == PlayerState.Running)
+                player.Update(frametime);
 
-            if (!move.Item1.IsBetween(0, pieces.Count - 1))
+            if (player.GetState() == PlayerState.Finished)
             {
-                // TODO: the player has given an invalid move piece
+                var move = player.GetMove();
+
+                Console.WriteLine("Red's move: {0} to {1}", move.Item1, move.Item2);
+
+                if (!move.Item1.IsBetween(0, pieces.Count - 1))
+                {
+                    // TODO: the player has given an invalid move piece
+                }
+
+                if (!move.Item2.IsBetween(0, tiles.Count - 1))
+                {
+                    // TODO: the player has given an invalid move tile
+                }
+
+                var piece = pieces[move.Item1];
+                var to = tiles[move.Item2];
+
+                if (piece.color != player.PlayerColor)
+                {
+                    // TODO: the player tried to move a piece which doesn't belong to them
+                }
+
+                if (piece.eaten)
+                {
+                    // TODO: the player tried to move an eaten piece
+                }
+
+                piece.SetBoardPos(to.boardPos);
+
+                turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
+
+                Console.WriteLine("It is now {0}'s turn", turn);
             }
-
-            if (!move.Item2.IsBetween(0, tiles.Count - 1))
-            {
-                // TODO: the player has given an invalid move tile
-            }
-
-            var piece = pieces[move.Item1];
-            var to = tiles[move.Item2];
-
-            if (piece.color != player.PlayerColor)
-            {
-                // TODO: the player tried to move a piece which doesn't belong to them
-            }
-
-            if (piece.eaten)
-            {
-                // TODO: the player tried to move an eaten piece
-            }
-
-            piece.SetBoardPos(to.boardPos);
-
-            HandleTurn(true, false);
         }
 
         public override void Draw(RenderTarget target, RenderStates states)

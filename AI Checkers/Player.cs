@@ -8,20 +8,38 @@ using SFML.Window;
 
 namespace AI_Checkers
 {
+    public enum PlayerState
+    {
+        Idle,
+        Running,
+        Finished
+    }
+
     public abstract class Player
     {
         public PieceColor PlayerColor { get; private set; }
 
         protected Game game;
+        protected PlayerState state;
 
         public Player(Game game, PieceColor color)
         {
             this.game = game;
             PlayerColor = color;
-            
+            state = PlayerState.Idle;
         }
 
-        public virtual Task<Tuple<int, int>> GetMove()
+        public virtual void StartMove()
+        {
+            state = PlayerState.Running;
+        }
+
+        public virtual PlayerState GetState()
+        {
+            return state;
+        }
+
+        public virtual Tuple<int, int> GetMove()
         {
             return null;
         }

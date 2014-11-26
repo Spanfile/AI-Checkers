@@ -17,7 +17,7 @@ namespace AI_Checkers
         int picked = -1;
         int to = -1;
 
-        ManualResetEvent doneEvent;
+        Tuple<int, int> result;
 
         Ingame ingame;
 
@@ -25,8 +25,6 @@ namespace AI_Checkers
             : base(game, color)
         {
             ingame = GameState.Ingame;
-
-            doneEvent = new ManualResetEvent(false);
         }
 
         void Clicked(Tile clicked)
@@ -52,44 +50,46 @@ namespace AI_Checkers
             else
             {
                 var allowed = ingame.GetPossibleMoveIndices(picked);
+                piece = ingame.pieces[picked];
 
                 if (!allowed.Contains(ingame.tiles.IndexOf(clicked)))
                     return;
 
-                ingame.pieces[picked].picked = false;
+                piece.picked = false;
+                ingame.pickedIndex = -1;
 
-                to = ingame.tiles.IndexOf(clicked);
+                if (!piece.boardPos.Equals(clicked.boardPos))
+                {
+                    to = ingame.tiles.IndexOf(clicked);
+                    result = new Tuple<int, int>(picked, to);
 
-                doneEvent.Set();
+                    state = PlayerState.Finished;
+                }
+
+                picked = -1;
 
                 Console.WriteLine("{0}: Piece dropped", PlayerColor);
             }
         }
 
-        public async override Task<Tuple<int, int>> GetMove()
+        public override void StartMove()
         {
             active = true;
 
-            return await HandleMove();
+            result = null;
+            picked = -1;
+            to = -1;
+
+            base.StartMove();
         }
 
-        Task<Tuple<int, int>> HandleMove()
+        public override Tuple<int, int> GetMove()
         {
-            return Task.Run<Tuple<int, int>>(() =>
-            {
-                doneEvent.WaitOne();
-                doneEvent.Reset();
-
-                active = false;
-
-                var result = new Tuple<int, int>(picked, to);
-
-                picked = -1;
-                ingame.pickedIndex = -1;
-                to = -1;
-
+            if (result != null)
                 return result;
-            });
+
+            Console.WriteLine("{0}: GetMove called, result is null", PlayerColor);
+            return new Tuple<int, int>(-1, -1);
         }
 
         public override void Update(float frametime)
@@ -105,7 +105,7 @@ namespace AI_Checkers
             {
                 if (msDown == true)
                 {
-                    Console.WriteLine("{0}: Click!", PlayerColor);
+                    //Console.WriteLine("{0}: Click!", PlayerColor);
 
                     msDown = false;
 
