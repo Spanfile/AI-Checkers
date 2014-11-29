@@ -44,6 +44,11 @@ namespace AI_Checkers
             return null;
         }
 
+        public virtual void FinishMove()
+        {
+            state = PlayerState.Idle;
+        }
+
         public virtual void Stop()
         {
 

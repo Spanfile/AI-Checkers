@@ -8,47 +8,52 @@ using SFML.Window;
 
 namespace AI_Checkers
 {
-	public abstract class GameState
-	{
-		public static MainMenu MainMenu;
-		public static Ingame Ingame;
-		public bool Active { get; set; }
+    public abstract class GameState
+    {
+        public static MainMenu MainMenu;
+        public static Ingame Ingame;
+        public bool Active { get; set; }
 
-		public virtual Vector2f Bounds
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
+        public virtual Vector2f Bounds
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-		public bool Loaded { get; private set; }
+        public bool Loaded { get; private set; }
 
-		protected Game game;
+        protected Game game;
 
-		public GameState()
-		{
-		}
-		static GameState()
-		{
-			MainMenu = new MainMenu();
-			Ingame = new Ingame();
-		}
+        public GameState()
+        {
+        }
+        static GameState()
+        {
+            MainMenu = new MainMenu();
+            Ingame = new Ingame();
+        }
 
-		public virtual void Load(Game game)
-		{
-			this.game = game;
-			Loaded = true;
-		}
+        public virtual void Load(Game game)
+        {
+            this.game = game;
+            Loaded = true;
+        }
 
-		public virtual void Update(float frametime)
-		{
+        public virtual void Close()
+        {
 
-		}
+        }
 
-		public virtual void Draw(RenderTarget target, RenderStates states)
-		{
+        public virtual void Update(float frametime)
+        {
 
-		}
-	}
+        }
+
+        public virtual void Draw(RenderTarget target, RenderStates states)
+        {
+
+        }
+    }
 }

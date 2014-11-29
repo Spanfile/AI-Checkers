@@ -77,6 +77,14 @@ namespace AI_Checkers
             }
         }
 
+        public override void Close()
+        {
+            redPlayer.Stop();
+            blackPlayer.Stop();
+
+            base.Close();
+        }
+
         public void SetPlayerAI(bool red, bool black)
         {
             redAI = red;
@@ -350,6 +358,25 @@ namespace AI_Checkers
                     select piece).Count();
         }
 
+        bool IsValidMove(Piece piece, Tile to, PieceColor color)
+        {
+            var allowed = GetPossibleMoveIndices(pieces.IndexOf(piece));
+            return allowed.Contains(tiles.IndexOf(to)) &&
+                !piece.boardPos.Equals(to.boardPos) &&
+                piece.color == color &&
+                !piece.eaten;
+        }
+
+        void HandleMove(bool pieceEaten, bool triggerWin, Player player)
+        {
+            if (!pieceEaten)
+                turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
+
+            player.FinishMove();
+
+            Console.WriteLine("It is now {0}'s turn", turn);
+        }
+
         public override void Load(Game game)
         {
             //game.Window.MouseButtonPressed += Window_MouseButtonPressed;
@@ -395,7 +422,7 @@ namespace AI_Checkers
         {
             var player = turn == PieceColor.Red ? redPlayer : blackPlayer;
 
-            if (player.GetState() != PlayerState.Running)
+            if (player.GetState() == PlayerState.Idle)
                 player.StartMove();
 
             if (player.GetState() == PlayerState.Running)
@@ -405,30 +432,62 @@ namespace AI_Checkers
             {
                 var move = player.GetMove();
 
-                Console.WriteLine("Red's move: {0} to {1}", move.Item1, move.Item2);
+                Console.WriteLine("{0}'s move: {1} to {2}", player.PlayerColor, move.Item1, move.Item2);
 
                 if (!move.Item1.IsBetween(0, pieces.Count - 1))
                 {
-                    // TODO: the player has given an invalid move piece
+                    Console.WriteLine("{0} player gave invalid piece index ({1})", player.PlayerColor, move.Item1);
+                    HandleMove(false, false, player);
+                    return;
                 }
 
                 if (!move.Item2.IsBetween(0, tiles.Count - 1))
                 {
-                    // TODO: the player has given an invalid move tile
+                    Console.WriteLine("{0} player gave invalid tile index ({1})", player.PlayerColor, move.Item2);
+                    HandleMove(false, false, player);
+                    return;
                 }
 
                 var piece = pieces[move.Item1];
                 var to = tiles[move.Item2];
 
+                #region Piece move checking
+                var allowed = GetPossibleMoveIndices(pieces.IndexOf(piece));
+                if (!allowed.Contains(tiles.IndexOf(to)))
+                {
+                    Console.WriteLine("{0} player tried to move piece to invalid location (piece {1} is not in [{2}])", player.PlayerColor, move.Item1, String.Join(", ", allowed));
+                    HandleMove(false, false, player);
+                    return;
+                }
+
+                if (piece.boardPos.Equals(to.boardPos))
+                {
+                    Console.WriteLine("{0} player didn't move a piece ({1})", player.PlayerColor, move.Item1);
+                    HandleMove(false, false, player);
+                    return;
+                }
+
                 if (piece.color != player.PlayerColor)
                 {
-                    // TODO: the player tried to move a piece which doesn't belong to them
+                    Console.WriteLine("{0} player tried to move a piece which doesn't belong to them ({1})", player.PlayerColor, move.Item1);
+                    HandleMove(false, false, player);
+                    return;
                 }
 
                 if (piece.eaten)
                 {
-                    // TODO: the player tried to move an eaten piece
+                    Console.WriteLine("{0} player tried to move an eaten piece ({1})", player.PlayerColor, move.Item1);
+                    HandleMove(false, false, player);
+                    return;
                 }
+
+                if (!IsValidMove(piece, to, player.PlayerColor))
+                {
+                    Console.WriteLine("{0} player ", player.PlayerColor);
+                    HandleMove(false, false, player);
+                    return;
+                }
+                #endregion
 
                 var pieceEaten = false;
                 var change = to.boardPos - piece.boardPos;
@@ -453,10 +512,7 @@ namespace AI_Checkers
 
                 piece.SetBoardPos(to.boardPos);
 
-                if (!pieceEaten)
-                    turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
-
-                Console.WriteLine("It is now {0}'s turn", turn);
+                HandleMove(pieceEaten, false, player);
             }
         }
 

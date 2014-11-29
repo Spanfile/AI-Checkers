@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AI Checkers", "AI Checkers\AI Checkers.csproj", "{C661651F-D4A4-4D44-80A6-F04CBA99DA8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AI", "AI\AI.csproj", "{6BC60CD3-C1E2-4665-A155-4F3CCEACB36B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedAI", "AI\RedAI.csproj", "{6BC60CD3-C1E2-4665-A155-4F3CCEACB36B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
