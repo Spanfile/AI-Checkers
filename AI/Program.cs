@@ -4,17 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AI_Checkers
+namespace AI
 {
     class Program
     {
         static void Main(string[] args)
         {
-            using (var game = new Game())
-            {
-                Config.LoadConfigFile("config.cfg");
-                game.Start(1200, 675, "AI Checkers");
-            }
         }
     }
 }

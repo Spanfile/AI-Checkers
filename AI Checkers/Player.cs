@@ -44,6 +44,11 @@ namespace AI_Checkers
             return null;
         }
 
+        public virtual void Stop()
+        {
+
+        }
+
         public virtual void Update(float frametime)
         {
 

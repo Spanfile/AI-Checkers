@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -48,12 +49,32 @@ namespace AI_Checkers
             if (!redAI)
                 redPlayer = new HumanPlayer(game, PieceColor.Red);
             else
-                throw new NotImplementedException();
+            {
+                string redExe = Config.GetString("redAI");
+
+                if (!File.Exists(redExe))
+                {
+                    Console.WriteLine("Red player AI .exe doesn't exist, using human player for red");
+                    redPlayer = new HumanPlayer(game, PieceColor.Red);
+                }
+                else
+                    redPlayer = new AIPlayer(game, PieceColor.Red, redExe, "");
+            }
 
             if (!blackAI)
                 blackPlayer = new HumanPlayer(game, PieceColor.Black);
             else
-                throw new NotImplementedException();
+            {
+                string blackExe = Config.GetString("blackAI");
+
+                if (!File.Exists(blackExe))
+                {
+                    Console.WriteLine("Black player AI .exe doesn't exist, using human player for black");
+                    blackPlayer = new HumanPlayer(game, PieceColor.Black);
+                }
+                else
+                    blackPlayer = new AIPlayer(game, PieceColor.Black, blackExe, "");
+            }
         }
 
         public void SetPlayerAI(bool red, bool black)
@@ -413,7 +434,7 @@ namespace AI_Checkers
                 var change = to.boardPos - piece.boardPos;
                 if (Math.Abs(change.X) > 1 && Math.Abs(change.Y) > 1)
                 {
-                    var gcd = (float)Math.Abs(Extensions.GreatestCommonDivisor(change.X, change.Y));
+                    var gcd = (float)Math.Abs(Extensions.GCD(change.X, change.Y));
                     var dir = new Vector2f(change.X / gcd, change.Y / gcd);
                     var inverse = piece.color == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
@@ -460,8 +481,7 @@ namespace AI_Checkers
                 {
                     var color = point ? Color.Red : Color.Yellow;
 
-                    var verts = (from vert in tile.GetVerts()
-                                 select new Vertex(vert.Position + tile.Position, color)).ToList();
+                    var verts = tile.GetVerts().Select((v) => new Vertex(v.Position + tile.Position, color)).ToList();
                     verts.Add(verts.First());
                     target.Draw(verts.ToArray(), PrimitiveType.LinesStrip, states);
                 }

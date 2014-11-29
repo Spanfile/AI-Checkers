@@ -50,12 +50,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AIPlayer.cs" />
     <Compile Include="Animation.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="HumanPlayer.cs" />
     <Compile Include="Ingame.cs" />
+    <Compile Include="MoveInfo.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="MarqueeAnim.cs" />

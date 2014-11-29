@@ -36,12 +36,12 @@ namespace AI_Checkers
             return new Vector2f(from.X + (to.X - from.X) * fraction, from.Y + (to.Y - from.Y) * fraction);
         }
 
-        public static double GreatestCommonDivisor(double a, double b)
+        public static double GCD(double a, double b)
         {
             if (b == 0)
                 return a;
 
-            return GreatestCommonDivisor(b, a % b);
+            return GCD(b, a % b);
         }
 
         public static bool IsBetween(this int num, int min, int max)
