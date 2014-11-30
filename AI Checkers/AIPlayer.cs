@@ -81,6 +81,7 @@ namespace AI_Checkers
 
         public override void Stop()
         {
+            Console.WriteLine("{0}: Closing AI", PlayerColor);
             WriteToAI("exit");
         }
     }

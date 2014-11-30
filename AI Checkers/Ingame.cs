@@ -46,6 +46,8 @@ namespace AI_Checkers
 
         public void Start()
         {
+            ResetBoard();
+
             if (!redAI)
                 redPlayer = new HumanPlayer(game, PieceColor.Red);
             else
@@ -83,6 +85,33 @@ namespace AI_Checkers
             blackPlayer.Stop();
 
             base.Close();
+        }
+
+        void ResetBoard()
+        {
+            tiles = new List<Tile>();
+            pieces = new List<Piece>();
+
+            boardSize = new Vector2f(Math.Min(Bounds.X, Bounds.Y) - 50, Math.Min(Bounds.X, Bounds.Y) - 50);
+
+            var tileSize = new Vector2f(boardSize.X / 8, boardSize.Y / 8);
+            for (var y = 0; y < 8; y++)
+            {
+                for (var x = 0; x < 8; x++)
+                {
+                    if (x % 2 != y % 2)
+                    {
+                        tiles.Add(new Tile(new Vector2f(x, y), tileSize, dark));
+
+                        if (y < 3)
+                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(247, 39, 39), PieceColor.Red));
+                        else if (y > 4)
+                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(66, 66, 66), PieceColor.Black));
+                    }
+                    else
+                        tiles.Add(new Tile(new Vector2f(x, y), tileSize, light));
+                }
+            }
         }
 
         public void SetPlayerAI(bool red, bool black)
@@ -319,16 +348,12 @@ namespace AI_Checkers
 
         bool IsPieceAt(Vector2f point)
         {
-            return (from piece in pieces
-                    where piece.boardPos.Equals(point) && !piece.eaten
-                    select piece).Any();
+            return pieces.Find(p => p.boardPos.Equals(point) && !p.eaten) != null;
         }
 
         bool IsPieceAt(Vector2f point, PieceColor type)
         {
-            return (from piece in pieces
-                    where piece.boardPos.Equals(point) && piece.color == type && !piece.eaten
-                    select piece).Any();
+            return pieces.Find(p => p.boardPos.Equals(point) && !p.eaten && p.color == type) != null;
         }
 
         int GetIndexOfPiece(Vector2f point)
@@ -336,9 +361,7 @@ namespace AI_Checkers
             if (!IsPieceAt(point))
                 return -1;
 
-            return pieces.IndexOf((from piece in pieces
-                                   where piece.boardPos.Equals(point) && !piece.eaten
-                                   select piece).First());
+            return pieces.IndexOf(pieces.Where(p => p.boardPos.Equals(point)).First());
         }
 
         int GetIndexOfTile(Vector2f point)
@@ -346,16 +369,12 @@ namespace AI_Checkers
             if (point.X < 0 || point.X > 7 || point.Y < 0 || point.Y > 7)
                 return -1;
 
-            return tiles.IndexOf((from tile in tiles
-                                  where tile.boardPos.Equals(point)
-                                  select tile).First());
+            return tiles.IndexOf(tiles.Where(t => t.boardPos.Equals(point)).First());
         }
 
         int GetPieceCount(PieceColor type)
         {
-            return (from piece in pieces
-                    where piece.color == type
-                    select piece).Count();
+            return pieces.Where(p => p.color == type).Count();
         }
 
         bool IsValidMove(Piece piece, Tile to, PieceColor color)
@@ -369,6 +388,28 @@ namespace AI_Checkers
 
         void HandleMove(bool pieceEaten, bool triggerWin, Player player)
         {
+            // 'triggerWin' means the player opposite of 'Player' will win
+
+            if (player.PlayerColor == PieceColor.Red)
+            {
+                if (GetPieceCount(PieceColor.Red) == 0)
+                    triggerWin = true;
+            }
+            else
+            {
+                if (GetPieceCount(PieceColor.Black) == 0)
+                    triggerWin = true;
+            }
+
+            if (triggerWin)
+            {
+                var winner = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
+                Console.WriteLine("{0} has been triggered as the winner", winner);
+                GameState.EndMenu.SetWinner(winner);
+                game.SetActiveGameState(GameState.EndMenu);
+                return;
+            }
+
             if (!pieceEaten)
                 turn = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
 
@@ -382,27 +423,7 @@ namespace AI_Checkers
             //game.Window.MouseButtonPressed += Window_MouseButtonPressed;
             //game.Window.MouseButtonReleased += Window_MouseButtonReleased;
 
-            tiles = new List<Tile>();
-            pieces = new List<Piece>();
-
-            boardSize = new Vector2f(Math.Min(Bounds.X, Bounds.Y) - 50, Math.Min(Bounds.X, Bounds.Y) - 50);
-
-            var tileSize = new Vector2f(boardSize.X / 8, boardSize.Y / 8);
-            for (var y = 0; y < 8; y++)
-                for (var x = 0; x < 8; x++)
-                {
-                    if (x % 2 != y % 2)
-                    {
-                        tiles.Add(new Tile(new Vector2f(x, y), tileSize, dark));
-
-                        if (y < 3)
-                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(247, 39, 39), PieceColor.Red));
-                        else if (y > 4)
-                            pieces.Add(new Piece(new Vector2f(x, y), tileSize, new Color(66, 66, 66), PieceColor.Black));
-                    }
-                    else
-                        tiles.Add(new Tile(new Vector2f(x, y), tileSize, light));
-                }
+            ResetBoard();
 
             var center = new Vector2f(Bounds.X / 2f, Bounds.Y / 2f);
 
@@ -437,14 +458,14 @@ namespace AI_Checkers
                 if (!move.Item1.IsBetween(0, pieces.Count - 1))
                 {
                     Console.WriteLine("{0} player gave invalid piece index ({1})", player.PlayerColor, move.Item1);
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
 
                 if (!move.Item2.IsBetween(0, tiles.Count - 1))
                 {
                     Console.WriteLine("{0} player gave invalid tile index ({1})", player.PlayerColor, move.Item2);
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
 
@@ -456,35 +477,28 @@ namespace AI_Checkers
                 if (!allowed.Contains(tiles.IndexOf(to)))
                 {
                     Console.WriteLine("{0} player tried to move piece to invalid location (piece {1} is not in [{2}])", player.PlayerColor, move.Item1, String.Join(", ", allowed));
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
 
                 if (piece.boardPos.Equals(to.boardPos))
                 {
                     Console.WriteLine("{0} player didn't move a piece ({1})", player.PlayerColor, move.Item1);
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
 
                 if (piece.color != player.PlayerColor)
                 {
                     Console.WriteLine("{0} player tried to move a piece which doesn't belong to them ({1})", player.PlayerColor, move.Item1);
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
 
                 if (piece.eaten)
                 {
                     Console.WriteLine("{0} player tried to move an eaten piece ({1})", player.PlayerColor, move.Item1);
-                    HandleMove(false, false, player);
-                    return;
-                }
-
-                if (!IsValidMove(piece, to, player.PlayerColor))
-                {
-                    Console.WriteLine("{0} player ", player.PlayerColor);
-                    HandleMove(false, false, player);
+                    HandleMove(false, true, player);
                     return;
                 }
                 #endregion
@@ -563,7 +577,7 @@ namespace AI_Checkers
         /// </summary>
         /// <param name="target"></param>
         /// <param name="states"></param>
-        public void DrawBoard(RenderTarget target, RenderStates states)
+        public void DrawBoardDecor(RenderTarget target, RenderStates states)
         {
             states.Transform *= boardTransform;
 

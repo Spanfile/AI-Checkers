@@ -9,9 +9,9 @@ using SFML.Window;
 
 namespace AI_Checkers
 {
-    public class MainMenu : GameState
+    public class EndMenu : GameState
     {
-        public override Vector2f Bounds
+        public override SFML.Window.Vector2f Bounds
         {
             get
             {
@@ -23,9 +23,16 @@ namespace AI_Checkers
         MarqueeAnim uiBaseShow;
         MarqueeAnim uiBaseHide;
 
-        public MainMenu()
+        PieceColor winner;
+
+        public EndMenu()
         {
 
+        }
+
+        public void SetWinner(PieceColor winner)
+        {
+            this.winner = winner;
         }
 
         public override void Load(Game game)
@@ -37,33 +44,23 @@ namespace AI_Checkers
 
             uiBase = new Frame(game, new Vector2f(Bounds.X / 2 - 250, -400), new Vector2f(500, 300), new Color(177, 219, 222, 200));
 
-            var startButton = new Button(game, new Vector2f(190, 250), new Vector2f(120, 40), new Color(121, 219, 147), "Start!", font, Color.Black, 24);
-            startButton.Clicked += (s, e) => uiBaseHide.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y + 100), 0.2f);
+            var restartButton = new Button(game, new Vector2f(190, 200), new Vector2f(120, 40), new Color(121, 219, 147), "Restart", font, Color.Black, 24);
+            var menuButton = new Button(game, new Vector2f(190, 250), new Vector2f(120, 40), new Color(121, 219, 147), "Main menu", font, Color.Black, 24);
 
-            var ply1Check = new Checkbox(game, new Vector2f(10, 80), "Player 1 AI", Color.Black, font);
-            var ply2Check = new Checkbox(game, new Vector2f(10, 130), "Player 2 AI", Color.Black, font);
+            restartButton.Clicked += (s, e) => uiBaseHide.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y + 100), 0.2f);
 
-            var ply1ai = false;
-            var ply2ai = false;
+            uiBase.AddChild(new Label(game, new Vector2f(250, 20), String.Format("{0} has won the game!", winner), font, winner == PieceColor.Red ? Color.Red : Color.Black, 32));
 
-            ply1Check.CheckChanged += (s, e) => ply1ai = e.Checked;
-            ply2Check.CheckChanged += (s, e) => ply2ai = e.Checked;
-
-            uiBase.AddChild(new Label(game, new Vector2f(250, 20), "AI Checkers", font, Color.Black, 32));
-            uiBase.AddChild(startButton);
-            uiBase.AddChild(ply1Check);
-            uiBase.AddChild(ply2Check);
+            uiBase.AddChild(restartButton);
+            uiBase.AddChild(menuButton);
 
             uiBaseHide.Stopped += (s, e) =>
             {
-                GameState.Ingame.SetPlayerAI(ply1ai, ply2ai);
                 GameState.Ingame.Start();
                 game.SetActiveGameState(GameState.Ingame);
             };
 
             uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.2f);
-
-            GameState.Ingame.Load(game);
 
             base.Load(game);
         }

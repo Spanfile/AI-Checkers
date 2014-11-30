@@ -12,6 +12,8 @@ namespace AI_Checkers
     {
         public static MainMenu MainMenu;
         public static Ingame Ingame;
+        public static EndMenu EndMenu;
+
         public bool Active { get; set; }
 
         public virtual Vector2f Bounds
@@ -33,6 +35,7 @@ namespace AI_Checkers
         {
             MainMenu = new MainMenu();
             Ingame = new Ingame();
+            EndMenu = new EndMenu();
         }
 
         public virtual void Load(Game game)
