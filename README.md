@@ -20,16 +20,18 @@ The fields `string redAI` and `string blackAI` define the **full paths** to the 
 
 When the game asks for the AIs turn, it will write the current board to the AIs standard input in the following format
 
-**01010101|10101010|01010101|00000000|00000000|20202020|02020202|20202020**
+`01010101|10101010|01010101|00000000|00000000|20202020|02020202|20202020`
 
 where 0's represent empty squares, 1's represent squares with a red piece on it and 2's represent squares with a black piece on it.
-The vertical lines are splitters to easily see where the rows are split into lines.
+The vertical lines are splitters there to easily see where the rows are split into lines.
 
-After the AI has decided it's move, it has to give it in the following format
+After the AI has decided it's move, it has to write it into it's standard input in the following format
 
 `mv:<piece index> <tile index>`
 
 replacing `<piece index>` with the index of the piece it wants to move and `<tile index>` with the index of the tile it wants to move the piece on to.
+
+Anything else the AI writes into it's standard input will be shown in the game console. This helps you debug your AI.
 
 ##Winning or losing the game
 
