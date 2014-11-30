@@ -47,6 +47,7 @@ namespace AI_Checkers
         public void Start()
         {
             ResetBoard();
+            StopPlayers();
 
             if (!redAI)
                 redPlayer = new HumanPlayer(game, PieceColor.Red);
@@ -81,10 +82,18 @@ namespace AI_Checkers
 
         public override void Close()
         {
-            redPlayer.Stop();
-            blackPlayer.Stop();
+            StopPlayers();
 
             base.Close();
+        }
+
+        void StopPlayers()
+        {
+            if (redPlayer != null)
+                redPlayer.Stop();
+
+            if (blackPlayer != null)
+                blackPlayer.Stop();
         }
 
         void ResetBoard()
@@ -472,7 +481,7 @@ namespace AI_Checkers
                 var piece = pieces[move.Item1];
                 var to = tiles[move.Item2];
 
-                #region Piece move checking
+                #region Piece move validation
                 var allowed = GetPossibleMoveIndices(pieces.IndexOf(piece));
                 if (!allowed.Contains(tiles.IndexOf(to)))
                 {
@@ -502,6 +511,12 @@ namespace AI_Checkers
                     return;
                 }
                 #endregion
+
+                if ((piece.color == PieceColor.Red && piece.boardPos.Y == 7) || (piece.color == PieceColor.Black && piece.boardPos.Y == 0))
+                {
+                    piece.super = true;
+                    Console.WriteLine("The piece is now a super piece!");
+                }
 
                 var pieceEaten = false;
                 var change = to.boardPos - piece.boardPos;
@@ -572,11 +587,6 @@ namespace AI_Checkers
             }
         }
 
-        /// <summary>
-        /// Used to draw the board only as a decoration
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="states"></param>
         public void DrawBoardDecor(RenderTarget target, RenderStates states)
         {
             states.Transform *= boardTransform;

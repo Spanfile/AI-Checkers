@@ -9,11 +9,12 @@ namespace AI_Checkers
 {
     public class MoveInfo
     {
+        bool useLineSeparator = true;
         byte[] map;
 
         public MoveInfo()
         {
-
+            useLineSeparator = Config.GetBool("useLineSeparator");
         }
 
         public void SetMap(List<Tile> tiles, List<Piece> pieces)
@@ -25,7 +26,7 @@ namespace AI_Checkers
 
         public string Serialize()
         {
-            return String.Join("|", MapEnum());
+            return String.Join(useLineSeparator ? "|" : "", MapEnum());
         }
 
         IEnumerable<string> MapEnum()
@@ -33,7 +34,7 @@ namespace AI_Checkers
             int index = 0;
             while (index < map.Length / 8)
             {
-                yield return String.Join("", map.Skip(8 * index).Take(8));
+                yield return String.Join("", map.Skip(index * 8).Take(8));
                 index += 1;
             }
         }

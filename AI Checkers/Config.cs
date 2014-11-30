@@ -11,11 +11,13 @@ namespace AI_Checkers
     {
         static Dictionary<string, int> integers;
         static Dictionary<string, string> strings;
+        static Dictionary<string, bool> booleans;
 
         static Config()
         {
             integers = new Dictionary<string, int>();
             strings = new Dictionary<string, string>();
+            booleans = new Dictionary<string, bool>();
         }
 
         public static int GetInteger(string name)
@@ -30,6 +32,14 @@ namespace AI_Checkers
         {
             if (strings.ContainsKey(name))
                 return strings[name];
+
+            throw new ArgumentException();
+        }
+
+        public static bool GetBool(string name)
+        {
+            if (booleans.ContainsKey(name))
+                return booleans[name];
 
             throw new ArgumentException();
         }
@@ -54,7 +64,7 @@ namespace AI_Checkers
 
                 if (args.Length != 2)
                 {
-                    Console.WriteLine("Config: Invalid line {0} (wrong amount of arguments, wanted 2, got {1})", index, args.Length);
+                    Console.WriteLine("Config: Invalid line #{0} (wrong amount of arguments; wanted 2, got {1})", index, args.Length);
                     continue;
                 }
 
@@ -63,7 +73,7 @@ namespace AI_Checkers
 
                 if (typeArgs.Length != 2)
                 {
-                    Console.WriteLine("Config: Invalid line {0} (wrong amount of type arguments, wanted 2, got {1})", index, typeArgs.Length);
+                    Console.WriteLine("Config: Invalid line #{0} (wrong amount of type arguments; wanted 2, got {1})", index, typeArgs.Length);
                     continue;
                 }
 
@@ -73,15 +83,16 @@ namespace AI_Checkers
                 switch (type)
                 {
                     default:
-                        Console.WriteLine("Config: Invalid line {0} (wrong type, wanted \"string\" or \"int\", got \"{1}\")", index, type);
+                        Console.WriteLine("Config: Invalid line {0} (wrong type; wanted \"bool\" (\"boolean\" works too), \"string\", \"int\" (\"integer\" works too), got \"{1}\")", index, type);
                         continue;
 
+                    case "integer":
                     case "int":
                         var intValue = 0;
 
                         if (!Int32.TryParse(argValue, out intValue))
                         {
-                            Console.WriteLine("Config: Invalid line {0} (wrong value type, wanted {1}, got \"{2}\")", index, type, argValue);
+                            Console.WriteLine("Config: Invalid line {0} (wrong value type; wanted \"{1}\", got \"{2}\")", index, type, argValue);
                             continue;
                         }
 
@@ -91,10 +102,23 @@ namespace AI_Checkers
                     case "string":
                         strings.Add(name, argValue);
                         break;
+
+                    case "boolean":
+                    case "bool":
+                        var boolValue = false;
+
+                        if (!Boolean.TryParse(argValue, out boolValue))
+                        {
+                            Console.WriteLine("Config: Invalid line {0} (wrong value type; wanted \"{1}\", got \"{2}\")", index, type, argValue);
+                            continue;
+                        }
+
+                        booleans.Add(name, boolValue);
+                        break;
                 }
             }
 
-            Console.WriteLine("Config: {0} integer values and {1} string values loaded from \"{2}\"", integers.Count, strings.Count, Path.GetFileName(filepath));
+            Console.WriteLine("Config: {0} integer values, {1} string values and {2} boolean values loaded from \"{3}\"", integers.Count, strings.Count, booleans.Count, Path.GetFileName(filepath));
         }
     }
 }

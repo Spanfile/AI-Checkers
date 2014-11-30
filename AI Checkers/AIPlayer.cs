@@ -11,10 +11,13 @@ namespace AI_Checkers
     {
         Process aiProcess;
         Tuple<int, int> move;
+        bool killAI = false;
 
         public AIPlayer(Game game, PieceColor color, string fullAiPath, string args)
             : base(game, color)
         {
+            killAI = Config.GetBool("killAI");
+
             aiProcess = new Process();
             var startInfo = new ProcessStartInfo(fullAiPath, args);
 
@@ -81,8 +84,12 @@ namespace AI_Checkers
 
         public override void Stop()
         {
-            Console.WriteLine("{0}: Closing AI", PlayerColor);
-            WriteToAI("exit");
+            Console.WriteLine("{0}: Closing AI (force kill: {1})", PlayerColor, killAI);
+
+            if (!killAI)
+                WriteToAI("exit");
+            else
+                aiProcess.Kill();
         }
     }
 }
