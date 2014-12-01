@@ -101,6 +101,7 @@ namespace AI_Checkers
             Window.SetVerticalSyncEnabled(true);
 
             SetActiveGameState(GameState.MainMenu);
+            GameState.MainMenu.Show();
 
             var frametimer = new Stopwatch();
             while (Window.IsOpen())

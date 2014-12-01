@@ -414,8 +414,11 @@ namespace AI_Checkers
             {
                 var winner = player.PlayerColor == PieceColor.Red ? PieceColor.Black : PieceColor.Red;
                 Console.WriteLine("{0} has been triggered as the winner", winner);
+
                 GameState.EndMenu.SetWinner(winner);
                 game.SetActiveGameState(GameState.EndMenu);
+                GameState.EndMenu.Show();
+
                 return;
             }
 

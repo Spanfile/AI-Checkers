@@ -60,9 +60,13 @@ namespace AI_Checkers
                 game.SetActiveGameState(GameState.Ingame);
             };
 
-            uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.2f);
-
             base.Load(game);
+        }
+
+        public void Show()
+        {
+            uiBase.Position = new Vector2f(Bounds.X / 2 - 250, -400);
+            uiBaseShow.Start(uiBase, new Vector2f(Bounds.X / 2 - 250, Bounds.Y / 2 - 150), 0.2f);
         }
 
         public override void Update(float frametime)
